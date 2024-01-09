@@ -6,7 +6,6 @@ License Details: https://creativecommons.org/licenses/by/4.0/
 """
 
 import os, sys, re
-from typing import Any
 
 class SimpleForm:
     
@@ -34,16 +33,22 @@ class SimpleForm:
         self.spacing = " " * spacing
 
     def __call__(self):
+
         for key, value in self._values.items():
             value['title'] = key
             self._input(**value)
-        if self.separator: print(f"{ '-' * 100 }")
+        
+        self._display += f"\n{ '-' * 100 }"
+        self._clear()
+        print(self._display)
 
     def add(self, **kwargs):
+
         for key, value in kwargs.items():
             assert isinstance(value, dict), f"The { key } must be a dict"
             assert isinstance(value["type"], type), f"The { key } must have a type"
             assert 'description' in value, f"The { key } must have a description"
+        
         self._values.update(kwargs)
 
     def _clear(self):
@@ -71,6 +76,8 @@ class SimpleForm:
 
             if "default" in properties and newEntry == "":
                 newEntry = properties['default']
+            
+            assert newEntry != ""
         
             if properties['type'] == str:
                 if "min" in properties and len(newEntry) < properties['min']:
@@ -98,27 +105,3 @@ class SimpleForm:
 
         except KeyboardInterrupt:
             sys.exit(0)
-
-if __name__=="__main__":
-    x = SimpleForm("Hello World", orderedList=False, spacing=2)
-    
-    x.add(name={
-        "type": str,
-        "description": "Your name",
-        "default": "John Doe"
-    }, age={
-        "type": int,
-        "description": "Your age",
-        "min": 1,
-        "max": 100,
-        "default": 18
-    }, email={
-        "type": str,
-        "description": "Your email",
-        "validate": r"^[a-zA-Z0-9._%+-]{4,}@[a-z0-9.-]{2,}\.[a-z]{2,}$",
-        "default": "alanreisanjo@gmail.com"
-    })
-
-    x()
-
-    print(x.values)
