@@ -1,1 +1,1 @@
-from .SimpleForm import SimpleForm
+from .Form import Form
