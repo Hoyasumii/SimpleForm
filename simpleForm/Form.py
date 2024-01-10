@@ -1,16 +1,10 @@
-"""
-Project: SimpleForm
-Author: Alan Reis Anjos
-License: Creative Commons Attribution 4.0 International License
-License Details: https://creativecommons.org/licenses/by/4.0/
-"""
-
 import sys, re
 
 from .scripts.clear import clear
 from .scripts.listenKeyboard import listenKeyboard
 from .scripts.showItemList import showItemList
 from .scripts.isIterable import isIterable
+from .scripts.ternaryOperator import ternaryOperator as terno
 
 class Form:
     
@@ -20,20 +14,23 @@ class Form:
 
     @property
     def values(self):
-        return { key: value for key, value in self.__dict__.items() if key not in [ "_display", "_count", "orderedList", "spacing", "separator" ] }
+        return { key: value for key, value in self.__dict__.items() if key not in [ "_display", "_count", "orderedList", "spacing", "separator", "separatorSize" ] }
 
-    def __init__(self, title: str = "", separator: bool = True, orderedList: bool = True, spacing: int = 0):
+    def __init__(self, title: str = "", separator: str = "-", separatorSize: int = 100, orderedList: bool = True, spacing: int = 0):
         
         assert isinstance(title, str), "The title must be a string."
-        assert isinstance(separator, bool), "The separator must be a boolean."
+        assert isinstance(separator, str), "The separator must be a string."
+        assert isinstance(separatorSize, int), "The separatorSize must be a integer."
         assert isinstance(orderedList, bool), "The orderedList must be a boolean."
         assert isinstance(spacing, int), "The spacing must be a integer."
 
         self._display = f"{ title }"
         
-        self.separator = separator
-        if self.separator: self._display += f"\n{ '-' * 100 }"
+        if separator != "":
+            self._display += f"{ terno(self._display != "", "\n", "") }{ separator * separatorSize }" 
 
+        self.separator = separator
+        self.separatorSize = separatorSize
         self.orderedList = orderedList
         self.spacing = spacing
 
@@ -52,7 +49,7 @@ class Form:
             
             self._input(**value)
         
-        self._display += f"\n{ '-' * 100 }"
+        self._display += f"\n{ self.separator * self.separatorSize }"
         clear()
         print(self._display)
 
@@ -76,9 +73,9 @@ class Form:
         
         if ("min" in properties or "max" in properties) and properties['type'] in [ str, int, float ]:
             newEntryText += f" (" \
-                f"{ f"min: { properties['min'] if 'min' in properties else '' }"}" \
-                f"{ ", " if "min" in properties and "max" in properties else "" }" \
-                f"{ f"max: { properties['max'] }" if 'max' in properties else '' }" \
+                f"{ f"min: { terno("min" in properties, properties['min'], "") }"}" \
+                f"{ terno("min" in properties and "max" in properties, ", ", "") }" \
+                f"{ f"max: { terno("max" in properties, properties['max'], "") }" }" \
                 f")"
 
         if "default" in properties:
@@ -111,11 +108,11 @@ class Form:
                 if "max" in properties and newEntry > properties['max']:
                     raise
 
-            if "validate" in properties:
+            if "validate" in properties and properties['type'] == str:
                 assert re.match(properties['validate'], newEntry)
 
             self.__dict__[properties['title']] = newEntry
-            self._display += f"{ "\n" if self._display != "" else "" }{ newEntryText }: { newEntry }"
+            self._display += f"{ terno(self._display != "", "\n", "") }{ newEntryText }: { newEntry }"
         
         except ( ValueError, TypeError, AssertionError, RuntimeError ):
             self._count -= 1
@@ -129,7 +126,7 @@ class Form:
         self._count += 1
         clear()
 
-        newEntryText = f"{ showItemList(self._count, self.spacing, self.orderedList) } { properties['description'] if 'description' in properties else '' }"
+        newEntryText = f"{ showItemList(self._count, self.spacing, self.orderedList) } { terno("description" in properties, properties['description'], '') }"
 
         print(self._display)
         print(newEntryText + "? (y/n) ", end="")
@@ -142,9 +139,9 @@ class Form:
             self._booleanInput(**properties)
             return
 
-        self.__dict__[properties['title']] = True if newEntry == "Y" else False
+        self.__dict__[properties['title']] = terno(newEntry == "Y", True, False)
 
-        self._display += f"{ "\n" if self._display != "" else "" }{ newEntryText }? (y/n) { newEntry }"
+        self._display += f"{ terno(self._display != "", "\n", "") }{ newEntryText }? (y/n) { newEntry }"
 
     def _optionsInput(self, **properties):
 
@@ -156,8 +153,7 @@ class Form:
 
         spacing = self.spacing * 4 if self.spacing < 4 else self.spacing * 2
 
-        newEntryText = f"{ showItemList(self._count, self.spacing, self.orderedList) } { properties
-        ['description'] if 'description' in properties else '' }"
+        newEntryText = f"{ showItemList(self._count, self.spacing, self.orderedList) } { terno("description" in properties, properties['description'], "") }"
 
         options = ""
 
@@ -190,8 +186,8 @@ class Form:
         
         if properties['type'] == dict:
             self.__dict__[properties['title']] = key
-            self._display += f"{ "\n" if self._display != "" else "" }{ newEntryText }: { key }"
+            self._display += f"{ terno(self._display != "", "\n", "") }{ newEntryText }: { key }"
             return
 
         self.__dict__[properties['title']] = properties['options'][newEntry - 1]
-        self._display += f"{ "\n" if self._display != "" else "" }{ newEntryText }: { properties['options'][newEntry - 1] }"
+        self._display += f"{ terno(self._display != "", "\n", "") }{ newEntryText }: { properties['options'][newEntry - 1] }"

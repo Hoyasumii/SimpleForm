@@ -1,11 +1,5 @@
-"""
-Project: SimpleForm
-Author: Alan Reis Anjos
-License: Creative Commons Attribution 4.0 International License
-License Details: https://creativecommons.org/licenses/by/4.0/
-"""
-
 import os
+from .ternaryOperator import ternaryOperator
 
 def clear():
-    os.system("cls" if os.name == "nt" else "clear")
+    os.system(ternaryOperator(os.name == "nt", "cls", "clear"))
