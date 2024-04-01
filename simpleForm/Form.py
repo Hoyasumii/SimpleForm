@@ -1,10 +1,7 @@
 import sys, re
 
 from .scripts.clear import clear
-from .scripts.listenKeyboard import listenKeyboard
-from .scripts.showItemList import showItemList
-from .scripts.isIterable import isIterable
-from .scripts.ternaryOperator import ternaryOperator as terno
+from .scripts import listenKeyboard, showItemList, isIterable, newLine
 
 class Form:
     
@@ -27,7 +24,7 @@ class Form:
         self._display = f"{ title }"
         
         if separator != "":
-            self._display += f"{ terno(self._display != "", "\n", "") }{ separator * separatorSize }" 
+            self._display += f"{ newLine() if self._display != '' else '' }{ separator * separatorSize }" 
 
         self.separator = separator
         self.separatorSize = separatorSize
@@ -49,7 +46,7 @@ class Form:
             
             self._input(**value)
         
-        self._display += f"\n{ self.separator * self.separatorSize }"
+        self._display += f"{ newLine() }{ self.separator * self.separatorSize }"
         clear()
         print(self._display)
 
@@ -72,11 +69,7 @@ class Form:
         newEntryText = f"{ showItemList(self._count, self.spacing, self.orderedList) } { properties['description'] if 'description' in properties else '' }"
         
         if ("min" in properties or "max" in properties) and properties['type'] in [ str, int, float ]:
-            newEntryText += f" (" \
-                f"{ f"min: { terno("min" in properties, properties['min'], "") }"}" \
-                f"{ terno("min" in properties and "max" in properties, ", ", "") }" \
-                f"{ f"max: { terno("max" in properties, properties['max'], "") }" }" \
-                f")"
+            newEntryText += f" (min: { properties['min'] if 'min' in properties else '' }{ ', ' if 'min' in properties and 'max' in properties else '' }max: { properties['max'] if 'max' in properties else '' })"
 
         if "default" in properties:
             newEntryText += f" (default: { properties['default'] })"
@@ -112,7 +105,7 @@ class Form:
                 assert re.match(properties['validate'], newEntry)
 
             self.__dict__[properties['title']] = newEntry
-            self._display += f"{ terno(self._display != "", "\n", "") }{ newEntryText }: { newEntry }"
+            self._display += f"{ newLine() if self._display != '' else '' }{ newEntryText }: { newEntry }"
         
         except ( ValueError, TypeError, AssertionError, RuntimeError ):
             self._count -= 1
@@ -126,7 +119,7 @@ class Form:
         self._count += 1
         clear()
 
-        newEntryText = f"{ showItemList(self._count, self.spacing, self.orderedList) } { terno("description" in properties, properties['description'], '') }"
+        newEntryText = f"{ showItemList(self._count, self.spacing, self.orderedList) } { properties['description'] if 'description' in properties else '' }"
 
         print(self._display)
         print(newEntryText + "? (y/n) ", end="")
@@ -139,9 +132,9 @@ class Form:
             self._booleanInput(**properties)
             return
 
-        self.__dict__[properties['title']] = terno(newEntry == "Y", True, False)
+        self.__dict__[properties['title']] = (newEntry == "Y")
 
-        self._display += f"{ terno(self._display != "", "\n", "") }{ newEntryText }? (y/n) { newEntry }"
+        self._display += f"{ newLine() if self._display != '' else '' }{ newEntryText }? (y/n) { newEntry }"
 
     def _optionsInput(self, **properties):
 
@@ -153,7 +146,7 @@ class Form:
 
         spacing = self.spacing * 4 if self.spacing < 4 else self.spacing * 2
 
-        newEntryText = f"{ showItemList(self._count, self.spacing, self.orderedList) } { terno("description" in properties, properties['description'], "") }"
+        newEntryText = f"{ showItemList(self._count, self.spacing, self.orderedList) } { properties['description'] if 'description' in properties else '' }"
 
         options = ""
 
@@ -164,7 +157,7 @@ class Form:
             options = "\n".join([ f"{ showItemList(index + 1, spacing, True) } { option }" for index, option in enumerate(properties['options']) ])
 
         print(self._display)
-        print(f"{ newEntryText}: \n{ options }", end="")
+        print(f"{ newEntryText}: { newLine() }{ options }", end="")
 
         print()
         newEntry = listenKeyboard()
@@ -186,8 +179,8 @@ class Form:
         
         if properties['type'] == dict:
             self.__dict__[properties['title']] = key
-            self._display += f"{ terno(self._display != "", "\n", "") }{ newEntryText }: { key }"
+            self._display += f"{ newLine() if self._display != '' else '' }{ newEntryText }: { key }"
             return
 
         self.__dict__[properties['title']] = properties['options'][newEntry - 1]
-        self._display += f"{ terno(self._display != "", "\n", "") }{ newEntryText }: { properties['options'][newEntry - 1] }"
+        self._display += f"{ newLine() if self._display != '' else '' }{ newEntryText }: { properties['options'][newEntry - 1] }"
