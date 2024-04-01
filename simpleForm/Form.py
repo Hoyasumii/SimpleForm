@@ -72,7 +72,8 @@ class Form:
         newEntryText = f"{ showItemList(self._count, self.spacing, self.orderedList) } { properties['description'] if 'description' in properties else '' }"
         
         if ("min" in properties or "max" in properties) and properties['type'] in [ str, int, float ]:
-            newEntryText += f" (min: { properties['min'] if 'min' in properties else '' }{ ', ' if 'min' in properties and 'max' in properties else '' }max: { properties['max'] if 'max' in properties else '' })"
+            # newEntryText += f" (min: { properties['min'] if 'min' in properties else '' }{ ', ' if 'min' in properties and 'max' in properties else '' }{ "max: " + {properties["max"]} if 'max' in properties else '' })"
+            newEntryText += f" (min: {properties['min'] if 'min' in properties else ''}{', ' if 'min' in properties and 'max' in properties else ''}{'max: ' + str(properties['max']) if 'max' in properties else ''})"
 
         if "default" in properties:
             newEntryText += f" (default: { properties['default'] })"
