@@ -58,6 +58,9 @@ class Form:
             assert 'description' in value, f"The { key } must have a description."
         
         self._values.update(kwargs)
+
+    def clear(self):
+        self._values = {}
     
     def _input(self, **properties):
 
