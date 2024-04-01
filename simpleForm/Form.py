@@ -57,7 +57,7 @@ class Form:
             assert isinstance(value["type"], type), f"The { key } must have a type."
             assert 'description' in value, f"The { key } must have a description."
         
-        self._values.update(kwargs)
+        self._values = kwargs
 
     def clear(self):
         self._values = {}
