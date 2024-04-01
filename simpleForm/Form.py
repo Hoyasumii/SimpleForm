@@ -1,4 +1,4 @@
-import sys, re
+import sys, re, os
 
 from .scripts.clear import clear
 from .scripts import listenKeyboard, showItemList, isIterable, newLine
@@ -124,8 +124,14 @@ class Form:
         print(self._display)
         print(newEntryText + "? (y/n) ", end="")
 
-        print()
-        newEntry = listenKeyboard().upper()
+        newEntry = None
+
+        if (os.name == "nt"):
+            print()
+            newEntry = listenKeyboard().upper()
+        
+        else:
+            newEntry = input().upper()
 
         if newEntry not in [ "Y", "N" ]:
             self._count -= 1
@@ -159,8 +165,14 @@ class Form:
         print(self._display)
         print(f"{ newEntryText}: { newLine() }{ options }", end="")
 
+        newEntry = None
         print()
-        newEntry = listenKeyboard()
+
+        if (os.name == "nt"):
+            newEntry = listenKeyboard()
+        else:
+            newEntry = input()
+
         key = None
         
         try:
